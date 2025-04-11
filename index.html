@@ -1,50 +1,21 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Renderizador de JSON via URL</title>
-  <style>
-    body { font-family: Arial; padding: 20px; }
-    .container { padding: 10px; border: 1px solid #ccc; border-radius: 10px; }
-  </style>
-</head>
 <body>
-
-<h2>Layout gerado a partir de JSON remoto</h2>
 <div id="app"></div>
-
 <script>
-  // Coloque aqui a URL do seu JSON
-  const JSON_URL = "https://WHEEX-OFICIAL.github.io/WHEEX/index.json";
-
-  async function carregarJSON() {
-    try {
-      const res = await fetch(JSON_URL);
-      const json = await res.json();
-      const html = criarElemento(json);
-      document.getElementById("app").appendChild(html);
-    } catch (e) {
-      document.getElementById("app").textContent = "Erro ao carregar JSON: " + e;
-    }
-  }
-
-  function criarElemento(node) {
-    const el = document.createElement(node.tag);
-    if (node.attrs) {
-      for (let [key, value] of Object.entries(node.attrs)) {
-        el.setAttribute(key, value);
+  fetch("https://WHEEX-OFICIAL.github.io/WHEEX/index.json")
+    .then(r => r.json())
+    .then(json => {
+      function criar(e) {
+        let el = document.createElement(e.tag || "div");
+        if (e.attrs) for (let k in e.attrs) el.setAttribute(k, e.attrs[k]);
+        if (e.text) el.textContent = e.text;
+        if (e.children) e.children.forEach(c => el.appendChild(criar(c)));
+        return el;
       }
-    }
-    if (node.text) el.textContent = node.text;
-    if (node.children) {
-      node.children.forEach(child => {
-        el.appendChild(criarElemento(child));
-      });
-    }
-    return el;
-  }
-
-  carregarJSON();
+      document.getElementById("app").appendChild(criar(json));
+    })
+    .catch(e => document.getElementById("app").textContent = "Erro: " + e);
 </script>
-
 </body>
 </html>
